@@ -15,7 +15,7 @@ import { LeagueAdminConsoleComponent } from './league/league-hub/league-admin-co
   providedIn: 'root'
 })
 export class StoreService {
-  static readonly MONEY = 100;
+  static readonly MONEY = 200;
   static readonly SQUAD_LIMIT = 15;
   leaguesRef: AngularFireList<any>;
   uid$: Observable<string>;
@@ -150,7 +150,15 @@ export class StoreService {
         map(val => Boolean(val.length))
       );
   }
-
+  isFull(leagueId: string): Observable<boolean> {
+    return this.uid$
+      .pipe(
+        mergeMap(uid => this.db.list(`users/${uid}/leagues`,
+          ref => ref.orderByChild('leagueId').equalTo(leagueId)).valueChanges()),
+        take(1),
+        map(val => Boolean(val.length))
+      );
+  }
   getPlayers(leagueId: string): Observable<Player> {
     return this.db.list(`leagues/${leagueId}/players`)
       .valueChanges()
