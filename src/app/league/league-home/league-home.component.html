@@ -1,0 +1,56 @@
+<!-- <table class="table table-striped">
+    <caption>Your Admin Leagues</caption>
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let league of adminLeagues | async">
+            <td>{{league.leagueId}}</td>
+            <td>{{league.name}}</td>
+            <td><button (click)="deleteLeague(league)" class="btn btn-outline-danger">Delete</button></td>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-striped">
+    <caption>Your Member Leagues</caption>
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let league of memberLeagues | async">
+            <td>{{league.leagueId}}</td>
+            <td><a [routerLink]="['/leagues', league.leagueId]">{{league.name}}</a></td>
+            <td><button class="btn btn-outline-danger">Leave</button></td>
+        </tr>
+    </tbody>
+</table> -->
+
+<table class="table table-striped">
+    <caption>Let's start draft</caption>
+    <thead>
+        <tr>
+            <th scope="col">Created by admin</th>
+            <th scope="col">Members</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let league of totalLeagues | async">
+            <td>{{ league.name}} *created by* {{ league.admin }}</td>
+            <td>{{ getSize(league.members) }} / 12 joined</td>
+
+            <!-- <td><a [routerLink]="['/leagues', league.leagueId]">{{league.name}}</a></td> -->
+            <td><button class="btn btn-outline-info" (click)="joinLeague(league.leagueId)">Start Draft</button></td>
+            <td><button class="btn btn-outline-danger">Setting</button></td>
+        </tr>
+    </tbody>
+</table>
