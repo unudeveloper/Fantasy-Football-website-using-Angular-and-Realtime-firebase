@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase, AngularFireAction, AngularFireList } from '@angular/fire/database';
-import { Observable, Subject, zip, combineLatest } from 'rxjs';
+import { Observable, Subject, zip, combineLatest, Subscription } from 'rxjs';
 import { switchMap, map, mergeMap, take, mergeAll, count, reduce, tap } from 'rxjs/operators';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { PlayerService } from './players.service';
@@ -20,6 +20,7 @@ export class StoreService {
   leaguesRef: AngularFireList<any>;
   uid$: Observable<string>;
   uname$: Observable<string>;
+  currentUserMoney$: Observable<number>;
   dirtyUserLeagueEntries$: Subject<any|null>;
   userLeagueKeys$: Observable<AngularFireAction<firebase.database.DataSnapshot>[]>;
 
@@ -113,7 +114,8 @@ export class StoreService {
         if (canJoin) {
           this.db.list(`leagues/${leagueId}/members`).push(uid);
           this.db.list(`users/${uid}/leagues`)
-            .set(leagueId, { leagueId, name, status: 'bid', squadSize: 0, uid, money: StoreService.MONEY });
+            // .set(leagueId, { leagueId, name, status: 'bid', squadSize: 0, uid, money: StoreService.MONEY });
+            .set(leagueId, { leagueId, name, status: 'bid', squadSize: 0, uid });
           console.log(league);
           this.db.list(`users/${uid}/leagues`).update(leagueId, {name: league.name});
         }
@@ -304,7 +306,16 @@ export class StoreService {
 
   updateUserLeagueState(leagueId: string): void {
     const s = StoreService.SQUAD_LIMIT;
-    const m = StoreService.MONEY;
+    // const m = StoreService.MONEY;
+
+
+    //mycode
+    this.currentUserMoney$ = this.getUserMoney(leagueId);
+    let userMoney;
+    this.currentUserMoney$.subscribe(event => userMoney = event);
+
+    const m = userMoney;
+
     const bids$ = this.uid$
       .pipe(
         mergeMap(uid => this.db.list<any>(`users/${uid}/leagues/${leagueId}/resolvedBids`).valueChanges()),
@@ -343,4 +354,10 @@ export class StoreService {
       );
   }
 
+  setLeagueFeatures(cost: number, cooldown: number, currentLeagueId: number): void {
+    this.uid$
+      .subscribe(uid => this.db.object(`users/${uid}/leagues/${currentLeagueId}/money`).set(cost));
+    this.uid$
+    .subscribe(uid => this.db.object(`users/${uid}/leagues/${currentLeagueId}/cooldown`).set(cooldown));
+  }
 }

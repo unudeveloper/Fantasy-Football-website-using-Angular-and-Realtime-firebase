@@ -13,7 +13,7 @@
             </ngb-alert>
             <div class="my-3">
                 <span [ngClass]="belowThreshold(balance)?'bg-danger':'bg-success'" class="rounded-pill p-2">
-                    {{balance | currency:'GBP':'symbol':'1.0-1'}}M
+                    {{balance | currency:'USD':'symbol':'1.0-1'}}M
                 </span>
             </div>
         </section>
@@ -21,7 +21,7 @@
         <button class="list-group-item list-group-item-action" (click)="removeBid(item)" placement="left" ngbTooltip="Click to delete">
             <div class="d-flex w-100 justify-content-between">
                 <p class="mb-1">{{ item.name }}</p>
-                <small>{{ item.amount | currency:'GBP':'symbol':'1.0-1'}}M</small>
+                <small>{{ item.amount | currency:'USD':'symbol':'1.0-1'}}M</small>
             </div>
             <small class="mb-1">{{ item.player.position }} - {{ item.player.team }}</small>
         </button>

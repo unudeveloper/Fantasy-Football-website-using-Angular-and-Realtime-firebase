@@ -34,6 +34,7 @@ import { WINDOW_PROVIDERS } from './providers/window.providers';
 import { LeagueMemberSquadComponent } from './league/league-hub/league-member-squad/league-member-squad.component';
 import { LeagueMemberTableComponent } from './league/league-hub/league-member-table/league-member-table.component';
 
+
 @NgModule({
   declarations: [
     AppComponent,

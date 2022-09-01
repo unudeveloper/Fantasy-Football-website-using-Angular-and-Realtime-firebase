@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { StoreService } from 'src/app/store.service';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { ToastService } from 'src/app/toast/toast.service';
+import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-league-home',
   templateUrl: './league-home.component.html',
@@ -15,11 +16,19 @@ export class LeagueHomeComponent implements OnInit {
   memberLeagues: Observable<any>;
   leagueAdminName: Observable<any>;
   tte: Observable<string>;
-  constructor(private afAuth: AngularFireAuth, private leagueService: StoreService, private route:ActivatedRoute, private router: Router, private toastService: ToastService) {
+  closeResult: string;
+
+  leagueCost: number;
+  coolDownValue: number;
+  currentLeagueId: number;
+
+  constructor(private afAuth: AngularFireAuth, private leagueService: StoreService, private route:ActivatedRoute, private router: Router, private toastService: ToastService,private modalService: NgbModal) {
   //  this.adminLeagues = leagueService.getAdminLeagues();
   //  this.memberLeagues = leagueService.getMemberLeagues();
     this.totalLeagues = leagueService.getTotalLeagues();
     console.log("totalleague======",this.totalLeagues);
+    this.leagueCost = 200;
+    this.coolDownValue = 12;
   }
 
   ngOnInit() {
@@ -75,6 +84,33 @@ export class LeagueHomeComponent implements OnInit {
     let count = 0;
     Object.values(members).map(v => count++);
     return count;
-
   }
+
+  applyLeagueValue() {
+    console.log("cost:", this.leagueCost, "cooldown:", this.coolDownValue, "leagueid",this.currentLeagueId);
+    this.leagueService.setLeagueFeatures(this.leagueCost, this.coolDownValue, this.currentLeagueId);
+  }
+
+  //modal
+  open(content,currentLeagueId) {
+    this.currentLeagueId = currentLeagueId;
+
+    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
+      this.closeResult = `Closed with: ${result}`;
+    }, (reason) => {
+      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+    });
+  }
+  
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+    } else {
+      return  `with: ${reason}`;
+    }
+  }
+
+
 }

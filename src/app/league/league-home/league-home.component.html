@@ -50,7 +50,21 @@
 
             <!-- <td><a [routerLink]="['/leagues', league.leagueId]">{{league.name}}</a></td> -->
             <td><button class="btn btn-outline-info" (click)="joinLeague(league.leagueId)">Start Draft</button></td>
-            <td><button class="btn btn-outline-danger">Setting</button></td>
+            <td><button class="btn btn-outline-danger" id="show-projects-button" (click)="open(mymodal, league.leagueId)">Setting</button></td>
         </tr>
     </tbody>
 </table>
+
+<ng-template #mymodal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">League Setting</h4>
+    </div>
+    <div class="modal-body">
+        <p>Cost:</p> <input type="number" [(ngModel)]="leagueCost" value="200" placeholder="please input cost"/> <br/>
+        <p>Cooldown:</p><input type="number" [(ngModel)]="coolDownValue" value="12" placeholder="please input cooldown"/>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-info" (click)="applyLeagueValue()">Apply</button>
+        <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">close</button>
+    </div>
+</ng-template>
