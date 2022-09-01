@@ -10,13 +10,14 @@ import { IsLeagueAdminGuard } from './guards/is-league-admin.guard';
 import { RulesComponent } from './rules/rules.component';
 import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
-
+import { DraftComponent } from './draft/draft.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'players', component: PlayerListComponent},
   {path: 'leagues', component: LeagueComponent},
-  {path: 'leagues/:id', component: LeagueHubComponent},
+  {path: 'draft', component: DraftComponent},
+  {path: 'draft/:id', component: LeagueHubComponent},
   // {path: 'players', component: PlayerListComponent, canActivate: [AngularFireAuthGuard]},
   // {path: 'leagues', component: LeagueComponent, canActivate: [AngularFireAuthGuard]},
   // {path: 'leagues/:id', component: LeagueHubComponent, canActivate: [AngularFireAuthGuard]},

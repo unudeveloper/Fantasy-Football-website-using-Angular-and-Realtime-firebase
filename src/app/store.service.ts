@@ -51,7 +51,6 @@ export class StoreService {
       const aid = action.payload.val().admin;
       this.db.list(`users/${aid}/admin`).remove(lid);
       const members = action.payload.val().members;
-      console.log("this is members*******",members);
 
       for (const key of Object.keys(members)) {
         const member = members[key];
@@ -81,14 +80,17 @@ export class StoreService {
     newLeague$.subscribe(([newLeague, uid]: [League, string]) => {
       newLeague.setAdmin(uid);
       newLeague.name = name;
-      
-          // newLeague.SetAdminName(this.db.object<string>(`users/${uid}/name`).valueChanges());
+      let adname;
 
       const id = this.leaguesRef.push(newLeague).key;
+      
+      // this.getAdminName(uid).subscribe( event => adname = event); 
+      // console.log("%%%%adminname",adname);
+      // this.setAdminName(id,adname);
 
       this.db.list(`leagues/${id}/members`).push(uid);
-
       this.db.list(`users/${uid}/admin`).set(id, { leagueId: id, name });
+      this.db.list(`users/${uid}/admin/${id}/members`).push(uid);
       this.leaguesRef.update(id, {leagueId: id});
 
       this.db.list(`users/${uid}/leagues`)
@@ -123,19 +125,19 @@ export class StoreService {
         map(([league, canJoin, uid]: [League, boolean, string]) => canJoin)
       );
   }
+
   getAdminLeagues(): Observable<any> {
     return this.uid$.pipe(
       switchMap(uid => this.db.list(`users/${uid}/admin`).valueChanges())
     );
   }
-  
- 
 
   getMemberLeagues(): Observable<any> {
     return this.uid$.pipe(
       switchMap(uid => this.db.list(`users/${uid}/leagues`).valueChanges())
     );
   }
+
   getTotalLeagues(): Observable<any> {
     return this.uid$.pipe(
       switchMap(uid => this.db.list(`leagues`).valueChanges()
@@ -143,6 +145,7 @@ export class StoreService {
       take(3)   
     ); 
   } 
+
   isMember(leagueId: string): Observable<boolean> {
     return this.uid$
       .pipe(
@@ -152,6 +155,7 @@ export class StoreService {
         map(val => Boolean(val.length))
       );
   }
+
   isFull(leagueId: string): Observable<boolean> {
     return this.uid$
       .pipe(
@@ -161,6 +165,7 @@ export class StoreService {
         map(val => Boolean(val.length))
       );
   }
+
   getPlayers(leagueId: string): Observable<Player> {
     return this.db.list(`leagues/${leagueId}/players`)
       .valueChanges()
@@ -347,11 +352,15 @@ export class StoreService {
   }
 
   getAdminName(userId: string): Observable<string> {
-    console.log("this is user Id--------",userId);
+    console.log("@@@@@@@adminname",userId);
+    return this.db.object<string>(`users/${userId}/name`).valueChanges();
+  }
+
+  getLeagueMembers(leagueId: string): Observable<any> {
     return this.uid$
       .pipe(
-        mergeMap(uid => this.db.object<string>(`users/${userId}/name`).valueChanges())
-      );
+        mergeMap(uid => this.db.object<any>(`leagues/${leagueId}/members`).valueChanges())
+        );
   }
 
   setLeagueFeatures(cost: number, cooldown: number, currentLeagueId: number): void {
@@ -359,5 +368,10 @@ export class StoreService {
       .subscribe(uid => this.db.object(`users/${uid}/leagues/${currentLeagueId}/money`).set(cost));
     this.uid$
     .subscribe(uid => this.db.object(`users/${uid}/leagues/${currentLeagueId}/cooldown`).set(cooldown));
+  }
+
+  setAdminName(currentLeagueId: string,username: string): void {
+    this.uid$
+      .subscribe(uid => this.db.object(`leagues/${currentLeagueId}/adminname`).set(username));
   }
 }

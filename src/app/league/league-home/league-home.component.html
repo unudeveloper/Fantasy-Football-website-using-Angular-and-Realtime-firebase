@@ -1,9 +1,12 @@
-<!-- <table class="table table-striped">
+<!-- admin -->
+<table class="table table-striped">
     <caption>Your Admin Leagues</caption>
     <thead>
         <tr>
             <th scope="col">Id</th>
             <th scope="col">Name</th>
+            <th scope="col">Members</th>
+            <th scope="col">Start Draft</th>
             <th scope="col">Actions</th>
         </tr>
     </thead>
@@ -11,10 +14,17 @@
         <tr *ngFor="let league of adminLeagues | async">
             <td>{{league.leagueId}}</td>
             <td>{{league.name}}</td>
-            <td><button (click)="deleteLeague(league)" class="btn btn-outline-danger">Delete</button></td>
+            <td>{{ getMemberCounts(league.leagueId) }} / 12 joined</td> 
+            <td><button class="btn btn-outline-info" (click)="joinLeague(league.leagueId)">Start Draft</button></td>
+            <td>
+                <button (click)="deleteLeague(league)" class="btn btn-outline-danger">Delete</button>
+                <button class="btn btn-outline-danger" id="show-projects-button" (click)="open(mymodal, league.leagueId)">Setting</button>
+            </td>
         </tr>
     </tbody>
 </table>
+
+<!-- member -->
 <table class="table table-striped">
     <caption>Your Member Leagues</caption>
     <thead>
@@ -31,8 +41,9 @@
             <td><button class="btn btn-outline-danger">Leave</button></td>
         </tr>
     </tbody>
-</table> -->
+</table>
 
+<!-- all leagues -->
 <table class="table table-striped">
     <caption>Let's start draft</caption>
     <thead>
@@ -46,7 +57,7 @@
     <tbody>
         <tr *ngFor="let league of totalLeagues | async">
             <td>{{ league.name}} *created by* {{ league.admin }}</td>
-            <td>{{ getSize(league.members) }} / 12 joined</td>
+            <td>  12 joined</td>
 
             <!-- <td><a [routerLink]="['/leagues', league.leagueId]">{{league.name}}</a></td> -->
             <td><button class="btn btn-outline-info" (click)="joinLeague(league.leagueId)">Start Draft</button></td>

@@ -5,6 +5,7 @@ import { StoreService } from 'src/app/store.service';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { ToastService } from 'src/app/toast/toast.service';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { map } from 'lodash-es';
 @Component({
   selector: 'app-league-home',
   templateUrl: './league-home.component.html',
@@ -15,18 +16,17 @@ export class LeagueHomeComponent implements OnInit {
   adminLeagues: Observable<any>;
   memberLeagues: Observable<any>;
   leagueAdminName: Observable<any>;
+  leagueMembers: Observable<any>;
   tte: Observable<string>;
   closeResult: string;
-
   leagueCost: number;
   coolDownValue: number;
   currentLeagueId: number;
 
   constructor(private afAuth: AngularFireAuth, private leagueService: StoreService, private route:ActivatedRoute, private router: Router, private toastService: ToastService,private modalService: NgbModal) {
-  //  this.adminLeagues = leagueService.getAdminLeagues();
-  //  this.memberLeagues = leagueService.getMemberLeagues();
+   this.adminLeagues = leagueService.getAdminLeagues();
+   this.memberLeagues = leagueService.getMemberLeagues();
     this.totalLeagues = leagueService.getTotalLeagues();
-    console.log("totalleague======",this.totalLeagues);
     this.leagueCost = 200;
     this.coolDownValue = 12;
   }
@@ -60,7 +60,7 @@ export class LeagueHomeComponent implements OnInit {
       );
     this.showJoinToast();
 
-    this.router.navigate(['/leagues/',leagueId]);
+    this.router.navigate(['/draft/',leagueId]);
   }
 
   getAdminName(userid: string): Observable<string> {
@@ -80,9 +80,21 @@ export class LeagueHomeComponent implements OnInit {
     this.toastService.show(`You have already joined this league!`);
   }
 
-  getSize(members: object) {
+  // getSize(members: object) {
+
+  //   let count = 0;
+  //   Object.values(members).map(v => count++);
+  //   return count;
+  // }
+
+  getMemberCounts(leagueId: string) {
+  
+    // let count = 0;
+    // Object.values(this.leagueMembers).map(v => count++);
+    // console.log("this is count",count);
+    // return count;
     let count = 0;
-    Object.values(members).map(v => count++);
+    this.leagueService.getLeagueMembers(leagueId).subscribe(data => { count =  data.lengthFromService });
     return count;
   }
 
@@ -111,6 +123,4 @@ export class LeagueHomeComponent implements OnInit {
       return  `with: ${reason}`;
     }
   }
-
-
 }

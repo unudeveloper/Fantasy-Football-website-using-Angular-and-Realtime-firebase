@@ -3,18 +3,21 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { StoreService } from 'src/app/store.service';
 import { switchMap, map, takeUntil, tap, mergeAll, every, take, toArray } from 'rxjs/operators';
 import { League } from 'src/app/models/league';
-import { Observable, Subject, zip, combineLatest } from 'rxjs';
+import { Observable, Subject, zip, combineLatest, Subscription } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { User } from 'firebase';
 import { isEmpty } from 'lodash-es';
 
+import { interval } from "rxjs";
+import { shareReplay } from "rxjs/operators";
 @Component({
   selector: 'app-league-hub',
   templateUrl: './league-hub.component.html',
-  styleUrls: ['./league-hub.component.css']
+  styleUrls: ['./league-hub.component.css'],
+
 })
 export class LeagueHubComponent implements OnInit, OnDestroy {
-
+  public showContent: boolean = false;
   readonly BID_CART_TITLE = 'Bid Cart';
   readonly BID_HISTORY_TITLE = 'Bid History';
 
@@ -32,8 +35,13 @@ export class LeagueHubComponent implements OnInit, OnDestroy {
   leagueMembers$: Observable<any[]>;
   projectedMoney: number;
   squadSize$: Observable<number>;
-  constructor(private router: Router, private store: StoreService, private route: ActivatedRoute, private afAuth: AngularFireAuth) { }
+  minesubscription: Subscription;
+  remainedtime: number;
 
+  constructor(private router: Router, private store: StoreService, private route: ActivatedRoute, private afAuth: AngularFireAuth) {
+    setTimeout( () => this.showContent=true, 3000);
+  }
+  
   ngOnInit() {
     // console.log(this.memberMap);
     this.route.paramMap.pipe(
@@ -74,7 +82,7 @@ export class LeagueHubComponent implements OnInit, OnDestroy {
         this.squadSize$ = this.store.getSquadSize(l.leagueId);
       });
   }
-
+ 
   resolveBids(leagueId: string): void {
     this.store.resolveBids(leagueId);
   }
