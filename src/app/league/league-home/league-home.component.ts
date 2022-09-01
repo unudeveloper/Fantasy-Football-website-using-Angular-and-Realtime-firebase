@@ -39,6 +39,9 @@ export class LeagueHomeComponent implements OnInit {
     this.leagueService.deleteLeague(league.leagueId);
   }
 
+  leaveLeague(leagueId: string): void {
+    this.leagueService.leaveLeague(leagueId);
+  }
   // joinRoom(roomid: string): void {
   //   this.leagueService.joinRoom(roomid);
   //   this.router.navigate(['/leagues/',roomid]);
@@ -80,15 +83,14 @@ export class LeagueHomeComponent implements OnInit {
     this.toastService.show(`You have already joined this league!`);
   }
 
-  // getSize(members: object) {
+  getSize(members: object) {
 
-  //   let count = 0;
-  //   Object.values(members).map(v => count++);
-  //   return count;
-  // }
+    let count = 0;
+    Object.values(members).map(v => count++);
+    return count;
+  }
 
   getMemberCounts(leagueId: string) {
-  
     // let count = 0;
     // Object.values(this.leagueMembers).map(v => count++);
     // console.log("this is count",count);

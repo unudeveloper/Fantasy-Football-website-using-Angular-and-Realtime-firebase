@@ -14,7 +14,7 @@
         <tr *ngFor="let league of adminLeagues | async">
             <td>{{league.leagueId}}</td>
             <td>{{league.name}}</td>
-            <td>{{ getMemberCounts(league.leagueId) }} / 12 joined</td> 
+            <td>{{ getSize(league.members) }} / 12 joined</td> 
             <td><button class="btn btn-outline-info" (click)="joinLeague(league.leagueId)">Start Draft</button></td>
             <td>
                 <button (click)="deleteLeague(league)" class="btn btn-outline-danger">Delete</button>
@@ -38,7 +38,10 @@
         <tr *ngFor="let league of memberLeagues | async">
             <td>{{league.leagueId}}</td>
             <td><a [routerLink]="['/leagues', league.leagueId]">{{league.name}}</a></td>
-            <td><button class="btn btn-outline-danger">Leave</button></td>
+            <td>
+                <button (click)="leaveLeague(league.leagueId)" class="btn btn-outline-danger">Leave</button>
+                <button class="btn btn-outline-danger" id="show-projects-button" (click)="open(mymodal, league.leagueId)">Setting</button>
+            </td>
         </tr>
     </tbody>
 </table>

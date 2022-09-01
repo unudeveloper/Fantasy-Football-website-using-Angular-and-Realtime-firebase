@@ -88,11 +88,12 @@ export class StoreService {
       // console.log("%%%%adminname",adname);
       // this.setAdminName(id,adname);
 
-      this.db.list(`leagues/${id}/members`).push(uid);
+      this.db.list(`leagues/${id}/members`).set(uid,uid);
+      // this.db.list(`leagues/${id}/members`).push(uid);
+
       this.db.list(`users/${uid}/admin`).set(id, { leagueId: id, name });
       this.db.list(`users/${uid}/admin/${id}/members`).push(uid);
       this.leaguesRef.update(id, {leagueId: id});
-
       this.db.list(`users/${uid}/leagues`)
         .set(id, { leagueId: id, name, status: 'bid', squadSize: 0, uid, money: StoreService.MONEY });
 
@@ -107,6 +108,24 @@ export class StoreService {
     this.leaguesRef.remove(leagueId);
   }
 
+  leaveLeague(leagueId: string): void {
+    console.log("****************");
+    this.uid$
+      .subscribe(uid => {
+        this.db.list(`users/${uid}/leagues/${leagueId}`).remove();
+      });
+
+    this.uid$
+      .subscribe(uid => {
+        this.db.list(`leagues/${leagueId}/members/${uid}`).remove()
+      });
+    // this.uid$
+    //   .pipe(
+    //     mergeMap(uid => this.db.list(`leagues`,
+    //       ref => ref.orderByChild('admin').equalTo(uid)).valueChanges())
+    //   );
+  }
+
   joinLeague(leagueId: string): Observable<boolean> {
     const canJoin$ = this.isMember(leagueId).pipe(map(f => !f));
 
@@ -114,11 +133,11 @@ export class StoreService {
       .pipe(
         tap(([league, canJoin, uid]: [League, boolean, string]) => {
         if (canJoin) {
-          this.db.list(`leagues/${leagueId}/members`).push(uid);
+          // this.db.list(`leagues/${leagueId}/members`).push(uid);
+          this.db.list(`leagues/${leagueId}/members`).set(uid,uid);
           this.db.list(`users/${uid}/leagues`)
             // .set(leagueId, { leagueId, name, status: 'bid', squadSize: 0, uid, money: StoreService.MONEY });
             .set(leagueId, { leagueId, name, status: 'bid', squadSize: 0, uid });
-          console.log(league);
           this.db.list(`users/${uid}/leagues`).update(leagueId, {name: league.name});
         }
         }),
@@ -127,9 +146,15 @@ export class StoreService {
   }
 
   getAdminLeagues(): Observable<any> {
-    return this.uid$.pipe(
-      switchMap(uid => this.db.list(`users/${uid}/admin`).valueChanges())
-    );
+
+    return this.uid$
+      .pipe(
+        mergeMap(uid => this.db.list(`leagues`,
+          ref => ref.orderByChild('admin').equalTo(uid)).valueChanges())
+      );
+    // return this.uid$.pipe(
+    //   switchMap(uid => this.db.list(`users/${uid}/admin`).valueChanges())
+    // );
   }
 
   getMemberLeagues(): Observable<any> {
