@@ -18,10 +18,12 @@ export class LeagueHomeComponent implements OnInit {
   leagueAdminName: Observable<any>;
   leagueMembers: Observable<any>;
   tte: Observable<string>;
+ 
   closeResult: string;
   leagueCost: number;
   coolDownValue: number;
   currentLeagueId: number;
+  
 
   constructor(private afAuth: AngularFireAuth, private leagueService: StoreService, private route:ActivatedRoute, private router: Router, private toastService: ToastService,private modalService: NgbModal) {
    this.adminLeagues = leagueService.getAdminLeagues();
@@ -33,6 +35,7 @@ export class LeagueHomeComponent implements OnInit {
 
   ngOnInit() {
 
+    // this.router.navigate(['/leagues/',roomid]);
   }
 
   deleteLeague(league: any): void {
@@ -62,7 +65,6 @@ export class LeagueHomeComponent implements OnInit {
       }
       );
     this.showJoinToast();
-
     this.router.navigate(['/draft/',leagueId]);
   }
 
@@ -95,8 +97,9 @@ export class LeagueHomeComponent implements OnInit {
     // Object.values(this.leagueMembers).map(v => count++);
     // console.log("this is count",count);
     // return count;
+    console.log("tasdffasdf");
     let count = 0;
-    this.leagueService.getLeagueMembers(leagueId).subscribe(data => { count =  data.lengthFromService });
+    this.leagueService.getLeagueMembers(leagueId).subscribe(data => { count =  data.lengthFromService ;console.log("thisismemberdata^^^^^^",data)});
     return count;
   }
 
@@ -104,11 +107,12 @@ export class LeagueHomeComponent implements OnInit {
     console.log("cost:", this.leagueCost, "cooldown:", this.coolDownValue, "leagueid",this.currentLeagueId);
     this.leagueService.setLeagueFeatures(this.leagueCost, this.coolDownValue, this.currentLeagueId);
   }
-
+  
   //modal
   open(content,currentLeagueId) {
-    this.currentLeagueId = currentLeagueId;
+    this.leagueService.getLeagueMembers(currentLeagueId).subscribe(res => this.leagueMembers = res);
 
+    this.currentLeagueId = currentLeagueId;
     this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
     }, (reason) => {

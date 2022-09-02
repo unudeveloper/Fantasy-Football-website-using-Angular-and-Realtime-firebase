@@ -12,8 +12,8 @@
     </thead>
     <tbody>
         <tr *ngFor="let league of adminLeagues | async">
-            <td>{{league.leagueId}}</td>
-            <td>{{league.name}}</td>
+            <td>{{ league.leagueId }}</td>
+            <td>{{ league.name }}</td>
             <td>{{ getSize(league.members) }} / 12 joined</td> 
             <td><button class="btn btn-outline-info" (click)="joinLeague(league.leagueId)">Start Draft</button></td>
             <td>
@@ -40,7 +40,7 @@
             <td><a [routerLink]="['/leagues', league.leagueId]">{{league.name}}</a></td>
             <td>
                 <button (click)="leaveLeague(league.leagueId)" class="btn btn-outline-danger">Leave</button>
-                <button class="btn btn-outline-danger" id="show-projects-button" (click)="open(mymodal, league.leagueId)">Setting</button>
+                <button class="btn btn-outline-danger" id="show-projects-button" (click)="open(membermodal, league.leagueId)">Setting</button>
             </td>
         </tr>
     </tbody>
@@ -48,7 +48,6 @@
 
 <!-- all leagues -->
 <table class="table table-striped">
-    <caption>Let's start draft</caption>
     <thead>
         <tr>
             <th scope="col">Created by admin</th>
@@ -76,6 +75,33 @@
     <div class="modal-body">
         <p>Cost:</p> <input type="number" [(ngModel)]="leagueCost" value="200" placeholder="please input cost"/> <br/>
         <p>Cooldown:</p><input type="number" [(ngModel)]="coolDownValue" value="12" placeholder="please input cooldown"/>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Joined Members</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- <tr *ngFor="let member of leagueMembers ">
+                    <td></td>
+                    <td><button >Remove</button></td>
+                </tr> -->
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-info" (click)="applyLeagueValue()">Apply</button>
+        <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">close</button>
+    </div>
+</ng-template>
+
+<ng-template #membermodal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">League Setting</h4>
+    </div>
+    <div class="modal-body">
+        <p>Cost:</p> <input type="number" [(ngModel)]="leagueCost" value="200" placeholder="please input cost"/> <br/>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline-info" (click)="applyLeagueValue()">Apply</button>

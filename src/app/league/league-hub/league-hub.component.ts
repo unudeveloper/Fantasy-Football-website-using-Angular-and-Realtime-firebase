@@ -18,6 +18,7 @@ import { shareReplay } from "rxjs/operators";
 })
 export class LeagueHubComponent implements OnInit, OnDestroy {
   public showContent: boolean = false;
+
   readonly BID_CART_TITLE = 'Bid Cart';
   readonly BID_HISTORY_TITLE = 'Bid History';
 
@@ -37,9 +38,10 @@ export class LeagueHubComponent implements OnInit, OnDestroy {
   squadSize$: Observable<number>;
   minesubscription: Subscription;
   remainedtime: number;
+  passedTime: string;
 
   constructor(private router: Router, private store: StoreService, private route: ActivatedRoute, private afAuth: AngularFireAuth) {
-    setTimeout( () => this.showContent=true, 3000);
+    setTimeout( () => this.showContent=true, 6000);
   }
   
   ngOnInit() {

@@ -97,7 +97,7 @@ export class StoreService {
       this.db.list(`users/${uid}/leagues`)
         .set(id, { leagueId: id, name, status: 'bid', squadSize: 0, uid, money: StoreService.MONEY });
 
-      this.router.navigate(['/leagues/',id]);
+      this.router.navigate(['leagues']);
     });
     
   }
@@ -382,10 +382,8 @@ export class StoreService {
   }
 
   getLeagueMembers(leagueId: string): Observable<any> {
-    return this.uid$
-      .pipe(
-        mergeMap(uid => this.db.object<any>(`leagues/${leagueId}/members`).valueChanges())
-        );
+    console.log("currentLeagueId",leagueId);
+    return this.db.object<any>(`leagues/${leagueId}/members`).valueChanges();
   }
 
   setLeagueFeatures(cost: number, cooldown: number, currentLeagueId: number): void {
