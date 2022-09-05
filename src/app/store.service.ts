@@ -10,6 +10,9 @@ import { Player } from './models/player';
 import { User } from 'firebase';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { LeagueAdminConsoleComponent } from './league/league-hub/league-admin-console/league-admin-console.component';
+import { HttpClient } from "@angular/common/http";
+import { TopPlayer } from './models/topPlayer';
+
 
 @Injectable({
   providedIn: 'root'
@@ -23,9 +26,14 @@ export class StoreService {
   currentUserMoney$: Observable<number>;
   dirtyUserLeagueEntries$: Subject<any|null>;
   userLeagueKeys$: Observable<AngularFireAction<firebase.database.DataSnapshot>[]>;
+  leagueMembers: Observable<any>;
+  public topPlayers: TopPlayer[] = [];
+  tempRandPlayer: TopPlayer;
+  currentPlayer: Observable<number>;
+  ranknum: number;
 
   constructor(private db: AngularFireDatabase, private afAuth: AngularFireAuth,
-              private playerService: PlayerService, private leagueFactory: LeagueFactoryService , private route:ActivatedRoute, private router: Router ) {
+              private playerService: PlayerService, private leagueFactory: LeagueFactoryService , private route:ActivatedRoute, private router: Router , private http: HttpClient) {
     this.uid$ = afAuth.user.pipe(
       map((u: User) => u.uid),
       take(1)
@@ -38,6 +46,21 @@ export class StoreService {
       const [uid, leagueIdToDelete] = blob;
       db.list(`users/${uid}/leagues`).remove(leagueIdToDelete);
     });
+
+    this.http.get('assets/topplayers.csv', {responseType: 'text'})
+    .subscribe(
+        data => {
+            let csvToRowArray = data.split("\n");
+            for (let index = 1; index < csvToRowArray.length - 1; index++) {
+              let row = csvToRowArray[index].split(",");
+              this.topPlayers.push(new TopPlayer( parseInt( row[0], 10), row[1], row[2], row[3], row[4]));
+            }
+            // console.log(this.topPlayers);
+        },
+        error => {
+            console.log(error);
+        }
+    );
 
     // db.list(`users/${uid}/leagues`).snapshotChanges()
     //   .pipe(map(changes => changes
@@ -83,17 +106,21 @@ export class StoreService {
       let adname;
 
       const id = this.leaguesRef.push(newLeague).key;
-      
-      // this.getAdminName(uid).subscribe( event => adname = event); 
-      // console.log("%%%%adminname",adname);
-      // this.setAdminName(id,adname);
-
       this.db.list(`leagues/${id}/members`).set(uid,uid);
       // this.db.list(`leagues/${id}/members`).push(uid);
 
       this.db.list(`users/${uid}/admin`).set(id, { leagueId: id, name });
       this.db.list(`users/${uid}/admin/${id}/members`).push(uid);
+
+      this.db.list(`leagues/${id}`).set("topplayers",this.topPlayers)
+
       this.leaguesRef.update(id, {leagueId: id});
+
+      this.uid$
+        .subscribe(uid => this.db.object(`leagues/${id}/cooldown`).set(20));
+      this.uid$ 
+        .subscribe(uid => this.db.object(`leagues/${id}/totalPlayersCount`).set(15));
+
       this.db.list(`users/${uid}/leagues`)
         .set(id, { leagueId: id, name, status: 'bid', squadSize: 0, uid, money: StoreService.MONEY });
 
@@ -102,6 +129,10 @@ export class StoreService {
     
   }
   
+  getTopPlayers(leagueid: string, index: number): Observable<TopPlayer> {
+    console.log("hook-------------------");
+    return this.db.object<TopPlayer>(`leagues/${leagueid}/topplayers/${index}`).valueChanges();
+  }
 
   deleteLeague(leagueId: string): void {
     console.log('deleting' + leagueId);
@@ -109,7 +140,6 @@ export class StoreService {
   }
 
   leaveLeague(leagueId: string): void {
-    console.log("****************");
     this.uid$
       .subscribe(uid => {
         this.db.list(`users/${uid}/leagues/${leagueId}`).remove();
@@ -191,6 +221,41 @@ export class StoreService {
       );
   }
 
+  setLeagueFlag(leagueId: string): void {
+    this.leagueMembers = this.db.list(`leagues/${leagueId}/members`).valueChanges();
+    this.leagueMembers.subscribe(data => {
+      for (const index in data) {
+        this.db.list(`users/${data[index]}`).set('leagueflag',leagueId);
+      }
+    });
+  }
+
+  setLeagueFlagOff(leagueId: string): void {
+    this.leagueMembers = this.db.list(`leagues/${leagueId}/members`).valueChanges();
+    this.leagueMembers.subscribe(data => {
+      for (const index in data) {
+        this.db.list(`users/${data[index]}`).set('leagueflag','ended');
+      }
+    });
+  }
+
+  setRandomPlayer(leagueId: string): void {
+    let randomNum = Math.floor(Math.random() * 250);
+    this.leagueMembers = this.db.list(`leagues/${leagueId}/members`).valueChanges();
+    this.leagueMembers.subscribe(data => {
+      for (const index in data) {
+        this.db.list(`users/${data[index]}`).set('randPlayerRank',randomNum);
+      }
+    });
+  }
+
+  getRandomPlayer(leaguiId: string): Observable<TopPlayer> {
+    this.uid$.pipe(
+      mergeMap(uid => this.db.object<number>(`users/${uid}/randPlayerRank`).valueChanges())
+    ).subscribe( data => this.ranknum = data);
+    return this.getTopPlayers(leaguiId, this.ranknum);
+  }
+
   getPlayers(leagueId: string): Observable<Player> {
     return this.db.list(`leagues/${leagueId}/players`)
       .valueChanges()
@@ -224,7 +289,7 @@ export class StoreService {
       .pipe(
         mergeMap(uid => this.db.object(`users/${uid}/leagues/${leagueId}/status`).valueChanges())
       );
-  }
+  } 
 
   markTentativeBid(leagueId: string, bid: any): void {
     this.uid$
@@ -333,7 +398,6 @@ export class StoreService {
         }
       );
   }
-
   updateUserLeagueState(leagueId: string): void {
     const s = StoreService.SQUAD_LIMIT;
     // const m = StoreService.MONEY;
@@ -376,25 +440,41 @@ export class StoreService {
       );
   }
 
+  getCoolDown(leagueId: string): Observable<number>{
+    return this.db.object<number>(`leagues/${leagueId}/cooldown`).valueChanges();
+  }
+
+  getPickablePlayers(leagueId: string): Observable<number> {
+    return this.db.object<number>(`leagues/${leagueId}/totalPlayersCount`).valueChanges();
+
+  }
+
   getAdminName(userId: string): Observable<string> {
-    console.log("@@@@@@@adminname",userId);
     return this.db.object<string>(`users/${userId}/name`).valueChanges();
   }
 
   getLeagueMembers(leagueId: string): Observable<any> {
-    console.log("currentLeagueId",leagueId);
     return this.db.object<any>(`leagues/${leagueId}/members`).valueChanges();
   }
 
-  setLeagueFeatures(cost: number, cooldown: number, currentLeagueId: number): void {
+  getLeagueFlag(): Observable<string> {
+    return this.uid$.pipe(
+      switchMap(uid => this.db.object<string>(`users/${uid}/leagueflag`).valueChanges())
+    );
+  }
+  
+  setLeagueFeatures(cost: number, cooldown: number,totalPlayersCount: number, currentLeagueId: number): void {
     this.uid$
       .subscribe(uid => this.db.object(`users/${uid}/leagues/${currentLeagueId}/money`).set(cost));
     this.uid$
-    .subscribe(uid => this.db.object(`users/${uid}/leagues/${currentLeagueId}/cooldown`).set(cooldown));
+    .subscribe(uid => this.db.object(`leagues/${currentLeagueId}/cooldown`).set(cooldown));
+    this.uid$ 
+    .subscribe(uid => this.db.object(`leagues/${currentLeagueId}/totalPlayersCount`).set(totalPlayersCount));
   }
 
   setAdminName(currentLeagueId: string,username: string): void {
     this.uid$
       .subscribe(uid => this.db.object(`leagues/${currentLeagueId}/adminname`).set(username));
   }
+
 }

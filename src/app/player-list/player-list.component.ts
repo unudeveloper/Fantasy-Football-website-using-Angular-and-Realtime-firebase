@@ -3,7 +3,7 @@ import { PlayerService } from '../players.service';
 import { Player } from '../player';
 import { Observable } from 'rxjs';
 import { HttpClient } from "@angular/common/http";
-
+import { TopPlayer } from '../models/topPlayer';
 @Component({
   selector: 'app-player-list',
   templateUrl: './player-list.component.html',
@@ -22,9 +22,9 @@ export class PlayerListComponent implements OnInit {
             let csvToRowArray = data.split("\n");
             for (let index = 1; index < csvToRowArray.length - 1; index++) {
               let row = csvToRowArray[index].split(",");
-              this.topPlayers.push(new TopPlayer( parseInt( row[0], 10), row[1], row[2], row[3], parseInt(row[4] ,10)));
+              this.topPlayers.push(new TopPlayer( parseInt( row[0], 10), row[1], row[2], row[3], row[4]));
             }
-            console.log(this.topPlayers);
+            // console.log(this.topPlayers);
         },
         error => {
             console.log(error);
@@ -42,18 +42,3 @@ export class PlayerListComponent implements OnInit {
   }
 }
 
-export class TopPlayer{
-  rank: number;
-  playerName: String;
-  teamName: String;
-  position: String;
-  byeWeek: number;
-
-  constructor(rank: number, playerName: String, teamName: String, position: String, byeWeek: number){
-    this.rank = rank;
-    this.playerName = playerName;
-    this.teamName = teamName;
-    this.position = position;
-    this.byeWeek = byeWeek;
-  }
-}

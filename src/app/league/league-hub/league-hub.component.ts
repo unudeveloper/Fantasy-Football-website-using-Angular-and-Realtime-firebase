@@ -3,13 +3,14 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { StoreService } from 'src/app/store.service';
 import { switchMap, map, takeUntil, tap, mergeAll, every, take, toArray } from 'rxjs/operators';
 import { League } from 'src/app/models/league';
-import { Observable, Subject, zip, combineLatest, Subscription } from 'rxjs';
+import { Observable, Subject, zip, combineLatest, Subscription , timer} from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { User } from 'firebase';
 import { isEmpty } from 'lodash-es';
 
 import { interval } from "rxjs";
 import { shareReplay } from "rxjs/operators";
+import { TopPlayer } from 'src/app/models/topPlayer';
 @Component({
   selector: 'app-league-hub',
   templateUrl: './league-hub.component.html',
@@ -34,18 +35,23 @@ export class LeagueHubComponent implements OnInit, OnDestroy {
   memberMap = {};
   money$: Observable<number>;
   leagueMembers$: Observable<any[]>;
-  projectedMoney: number;
   squadSize$: Observable<number>;
   minesubscription: Subscription;
   remainedtime: number;
+  bidAmounts: number;
   passedTime: string;
 
+  topRandomPlayer: TopPlayer;
+
+  pauseResumeFlag: number = 1;
+  totalPickablePlayer: number;
+  counter$: Observable<number>;
+  count: number;
+
+  leagueflag:Observable<String>;
   constructor(private router: Router, private store: StoreService, private route: ActivatedRoute, private afAuth: AngularFireAuth) {
-    setTimeout( () => this.showContent=true, 6000);
-  }
-  
-  ngOnInit() {
-    // console.log(this.memberMap);
+    setTimeout( () => this.showContent=true, 5000);
+
     this.route.paramMap.pipe(
       takeUntil(this.unsubscribe$),
       switchMap((params: ParamMap) => this.store.getUserStatus(params.get('id')))
@@ -83,8 +89,80 @@ export class LeagueHubComponent implements OnInit, OnDestroy {
         this.money$ = this.store.getUserMoney(l.leagueId);
         this.squadSize$ = this.store.getSquadSize(l.leagueId);
       });
+    
+    this.league$.subscribe( l => {
+      this.setRandomPlayer(l.leagueId);
+      
+       this.getRandomPlayer(l.leagueId);
+    });
+
+    this.league$.subscribe( l => {
+      this.store.getCoolDown(l.leagueId).subscribe( data => { this.count = data;this.secondCounter();});
+      this.store.getPickablePlayers(l.leagueId).subscribe( data => { this.totalPickablePlayer = data; });
+    })
+    console.log("------count:",this.count,"pickableplayers:",this.totalPickablePlayer);
+    
   }
- 
+  
+  ngOnInit() {
+    // console.log(this.memberMap);
+
+    this.leagueflag = this.store.getLeagueFlag(); 
+    this.leagueflag.subscribe( league => {
+        if(league == 'ended'){
+          this.router.navigate(['/draft']);
+        }
+        else {
+          this.router.navigate(['/draft/',league]);
+        }
+        // this.router.navigate(['/draft/',league]);
+    });
+  }
+
+  pauseResume() {
+    this.pauseResumeFlag = -this.pauseResumeFlag;
+    this.secondCounter();
+  }
+
+  secondCounter() {
+    if(this.pauseResumeFlag == 1) {
+      this.counter$ = timer(0,1000).pipe(
+        take(this.count),
+        map(() => --this.count)
+      );
+    }
+    else if(this.pauseResumeFlag == -1) {
+      this.counter$ = timer(0,0).pipe(
+        take(this.count),
+        map(() => this.count)
+      );;
+    }
+  }
+
+  pickPlayerDraft() {
+
+  }
+
+  skipDraft() {
+
+  }
+
+  endDraft() {
+    this.league$.subscribe( l =>  this.store.setLeagueFlagOff(l.leagueId));
+  }
+
+  markBid(bidamount: number) {
+    console.log("------count:",this.count,"pickableplayers:",this.totalPickablePlayer);
+  }
+  
+  setRandomPlayer(leagueid: string) {
+    this.store.setRandomPlayer(leagueid);
+  }
+
+  getRandomPlayer(leagueId: string) {
+    this.store.getRandomPlayer(leagueId).subscribe( data => this.topRandomPlayer = data);
+  }
+
   resolveBids(leagueId: string): void {
     this.store.resolveBids(leagueId);
   }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { StoreService } from '../store.service';
 import { Observable } from 'rxjs';
 import { ToastService } from '../toast/toast.service';
-
+import { Router } from '@angular/router';
 @Component({
     selector: 'app-profile',
     templateUrl: './draft.component.html',
@@ -10,9 +10,20 @@ import { ToastService } from '../toast/toast.service';
 })
 
 export class DraftComponent implements OnInit {
-
-    constructor(private store: StoreService, private toast: ToastService) { }
+    leagueflag:Observable<String>;
+    constructor(private store: StoreService, private toast: ToastService, private router: Router) { 
+    }
 
     ngOnInit() {
+        this.leagueflag = this.store.getLeagueFlag();
+        this.leagueflag.subscribe( league => {
+            if(league == 'ended') {
+                this.router.navigate(['/draft']);
+            }
+            else {
+                this.router.navigate(['/draft/',league]);
+            }
+            
+        });
     }
 }

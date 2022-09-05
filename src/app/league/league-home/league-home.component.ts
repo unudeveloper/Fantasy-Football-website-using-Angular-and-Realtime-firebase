@@ -23,14 +23,15 @@ export class LeagueHomeComponent implements OnInit {
   leagueCost: number;
   coolDownValue: number;
   currentLeagueId: number;
-  
+  totalPlayersCount: number;
 
   constructor(private afAuth: AngularFireAuth, private leagueService: StoreService, private route:ActivatedRoute, private router: Router, private toastService: ToastService,private modalService: NgbModal) {
    this.adminLeagues = leagueService.getAdminLeagues();
    this.memberLeagues = leagueService.getMemberLeagues();
-    this.totalLeagues = leagueService.getTotalLeagues();
+   this.totalLeagues = leagueService.getTotalLeagues();
     this.leagueCost = 200;
-    this.coolDownValue = 12;
+    this.coolDownValue = 20;
+    this.totalPlayersCount = 15;
   }
 
   ngOnInit() {
@@ -51,6 +52,8 @@ export class LeagueHomeComponent implements OnInit {
   // }
 
   joinLeague(leagueId: string): void {
+    this.leagueService.setLeagueFlag(leagueId);
+
     this.leagueService.joinLeague(leagueId)
       .subscribe(canJoin => {
         if (canJoin) {
@@ -104,8 +107,8 @@ export class LeagueHomeComponent implements OnInit {
   }
 
   applyLeagueValue() {
-    console.log("cost:", this.leagueCost, "cooldown:", this.coolDownValue, "leagueid",this.currentLeagueId);
-    this.leagueService.setLeagueFeatures(this.leagueCost, this.coolDownValue, this.currentLeagueId);
+    console.log("cost:", this.leagueCost, "cooldown:", this.coolDownValue, "leagueid",this.currentLeagueId , );
+    this.leagueService.setLeagueFeatures(this.leagueCost, this.coolDownValue, this.totalPlayersCount, this.currentLeagueId);
   }
   
   //modal

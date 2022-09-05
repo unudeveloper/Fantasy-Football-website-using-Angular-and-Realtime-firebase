@@ -75,20 +75,7 @@
     <div class="modal-body">
         <p>Cost:</p> <input type="number" [(ngModel)]="leagueCost" value="200" placeholder="please input cost"/> <br/>
         <p>Cooldown:</p><input type="number" [(ngModel)]="coolDownValue" value="12" placeholder="please input cooldown"/>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">Joined Members</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- <tr *ngFor="let member of leagueMembers ">
-                    <td></td>
-                    <td><button >Remove</button></td>
-                </tr> -->
-            </tbody>
-        </table>
+        <p>Players</p><input type="number" [(ngModel)]="totalPlayersCount" value="12" placeholder="please input players count"/>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline-info" (click)="applyLeagueValue()">Apply</button>

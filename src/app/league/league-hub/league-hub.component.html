@@ -35,14 +35,27 @@
             </div>
             <!-- <app-my-squad class="col-12 col-md-4 my-2" [leagueId]="L.leagueId"></app-my-squad> -->
             <div class="col-12 col-md-8">
-                <button *ngIf="allWait && isAdmin" class="btn btn-info my-md-3" (click)="resolveBids(L.leagueId)">Resolve Bids</button>
-                <button *ngIf="canBid" [attr.aria-expanded]="!isOpen" class="btn btn-primary" (click)="isOpen = !isOpen" aria-controls="collapseExample">Player Pool</button>
+                <h2 class="row justify-content-center align-items-center">{{ counter$ | async}}s remained</h2>
+
+                <div *ngIf="topRandomPlayer">
+                    <h1 style="text-align: center;"> {{ topRandomPlayer.playerName }}</h1>
+                    <h2 style="text-align: center;"> {{ topRandomPlayer.position }}</h2>
+                    <h3 style="text-align: center;"> ByeWeek:{{ topRandomPlayer.byeWeek }}</h3>
+                    <h3 style="text-align: center;"> Rank: {{ topRandomPlayer.rank }}</h3>
+                </div>
+                <!-- <button *ngIf="allWait && isAdmin" class="btn btn-info my-md-3" (click)="resolveBids(L.leagueId)">Resolve Bids</button>
+                <button *ngIf="canBid" [attr.aria-expanded]="!isOpen" class="btn btn-primary" (click)="isOpen = !isOpen" aria-controls="collapseExample">Player Pool</button> -->
                 <hr>
-                <div class="">
-                    <button class="btn btn-info">Pause/Resume Draft</button>
-                    <button class="btn btn-info">Pick Player Draft</button>
-                    <button class="btn btn-info">Skip Player Draft</button>
-                    <button class="btn btn-info">End Draft</button>
+                <div class="row justify-content-center align-items-center">
+                    <input type="number" [(ngModel)]="bidAmounts" min="1"  max="100"  name="amount" class="form-control" placeholder="$1-100" style="width:20%">
+                    <button (click)="markBid(bidAmounts)" class="btn btn-outline-secondary" type="button" id="button-addon2">Mark Bid</button>
+                </div>
+                <hr>
+                <div *ngIf="isAdmin" class="row justify-content-center align-items-center">
+                    <button (click)="pauseResume()" class="btn btn-info">Pause/Resume Draft</button>
+                    <button (click)="pickPlayerDraft()" class="btn btn-info">Pick Player Draft</button>
+                    <button (click)="skipDraft()" class="btn btn-info">Skip Player Draft</button>
+                    <button (click)="endDraft()" class="btn btn-info">End Draft</button>
                 </div>
                 <hr>
                 <div id="collapseExample" [ngbCollapse]="isOpen || !canBid">
